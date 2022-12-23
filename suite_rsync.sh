@@ -16,8 +16,11 @@
 # Find and format a list of files with sizes in the current directory and all subdirectories.
 #> find . -type f -and \( -name '.*' -or -name '*' \) -print0 | wc -c --files0-from=- | sed 's# \./#\t#'`
 
+# Servers have been configured with SuiteCRM files with owner setting 'chown www-data:www-data'
+#   so that SuiteCRM can write to it's own files and directories.
+
 # Set command and universal options.
-declare -r RSYNC='rsync -e ssh --del -m'
+declare -r RSYNC='rsync -rlDue ssh'
 declare -r NL=$'\n'
 
 # Look for config file in the user's home directory.
@@ -59,10 +62,13 @@ sugarcrm_old.sql
 09888'
 
 # Do not push these back to either server.
-declare -r TO_SERVER_EXCLUDE='
+declare -r TO_LIVE_SERVER_EXCLUDE='
 *~
 /cache/***
-/custom/history/***'
+/custom/history/***
+/upload/***
+/upload:/***
+/vendor/***'
 
 usage () {
     echo "Usage: $(basename $0) [-dhis] local-dev-directory livetodev|devtolive|devtolocal|localtodev [subpath only]"
@@ -142,22 +148,22 @@ fi
 case $2 in
     livetodev)
         FILTERS="${COMMON_EXCLUDE}${LIVE_EXCLUDE}${SUBPATH_FILTER}"
-        CMD="$RSYNC -a${ADD_OPTIONS} --bwlimit=2m --exclude-from=- $LIVE_SERVER:$LIVE_SERVER_PATH $DEV_PATH"
+        CMD="$RSYNC ${ADD_OPTIONS} --bwlimit=2m --exclude-from=- $LIVE_SERVER:$LIVE_SERVER_PATH $DEV_PATH"
         ;;
 
     devtolive)
-        FILTERS="${TO_SERVER_EXCLUDE}${COMMON_EXCLUDE}${LIVE_EXCLUDE}${SUBPATH_FILTER}"
-        CMD="$RSYNC -rlg${ADD_OPTIONS} --bwlimit=2m --exclude-from=- $DEV_PATH $LIVE_SERVER:$LIVE_SERVER_PATH"
+        FILTERS="${TO_LIVE_SERVER_EXCLUDE}${COMMON_EXCLUDE}${LIVE_EXCLUDE}${SUBPATH_FILTER}"
+        CMD="$RSYNC ${ADD_OPTIONS} --bwlimit=2m --exclude-from=- $DEV_PATH $LIVE_SERVER:$LIVE_SERVER_PATH"
         ;;
 
     devtolocal)
-        FILTERS="${TO_SERVER_EXCLUDE}${COMMON_EXCLUDE}${SUBPATH_FILTER}"
-        CMD="$RSYNC -rlg${ADD_OPTIONS} --exclude-from=- $DEV_PATH $LOCAL_SERVER:$LOCAL_SERVER_PATH"
+        FILTERS="${COMMON_EXCLUDE}${SUBPATH_FILTER}"
+        CMD="$RSYNC ${ADD_OPTIONS} --exclude-from=- $DEV_PATH $LOCAL_SERVER:$LOCAL_SERVER_PATH"
         ;;
 
     localtodev)
         FILTERS="${COMMON_EXCLUDE}${SUBPATH_FILTER}"
-        CMD="$RSYNC -a${ADD_OPTIONS} --exclude-from=- $LOCAL_SERVER:$LOCAL_SERVER_PATH $DEV_PATH"
+        CMD="$RSYNC ${ADD_OPTIONS} --exclude-from=- $LOCAL_SERVER:$LOCAL_SERVER_PATH $DEV_PATH"
         ;;
 
     *)
