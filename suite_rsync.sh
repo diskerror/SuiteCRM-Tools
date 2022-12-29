@@ -61,8 +61,8 @@ IMPORT_*[0-9]
 sugarcrm_old.sql
 09888'
 
-# Do not push these back to either server.
-declare -r TO_LIVE_SERVER_EXCLUDE='
+# Do not push these back to live server.
+declare -r TO_LIVE_EXCLUDE='
 *~
 /cache/***
 /custom/history/***
@@ -121,7 +121,7 @@ declare -r DEV_PATH=$(realpath "$1")"/"
 # Read defaults from config file. They will overwrite corresponding variables.
 if [[ -f "${DEV_PATH}${CONFIG_FILE}" ]]
 then
-    source "$CONFIG_FILE"
+    source "${DEV_PATH}${CONFIG_FILE}"
 fi
 
 if [[ $# -eq 3 ]]
@@ -152,7 +152,7 @@ case $2 in
         ;;
 
     devtolive)
-        FILTERS="${TO_LIVE_SERVER_EXCLUDE}${COMMON_EXCLUDE}${LIVE_EXCLUDE}${SUBPATH_FILTER}"
+        FILTERS="${TO_LIVE_EXCLUDE}${COMMON_EXCLUDE}${LIVE_EXCLUDE}${SUBPATH_FILTER}"
         CMD="$RSYNC ${ADD_OPTIONS} --bwlimit=2m --exclude-from=- $DEV_PATH $LIVE_SERVER:$LIVE_SERVER_PATH"
         ;;
 

@@ -18,8 +18,8 @@ a more normalized way of comparing directory structures and files.
 
 ## ~/.*profile
 
-I've added these lines to my ".zprofile" file:
+I've added these lines to my  ".zprofile" file (MacOS Ventura):
 ~~~
-alias suite_rsync=~/Documents/Diskerror/SuiteCRM-Tools/suite_rsync.sh
-alias make_clean=~/Documents/Diskerror/SuiteCRM-Tools/make_clean.sh
+alias srsync=~/Documents/Diskerror/SuiteCRM-Tools/suite_rsync.sh
+alias mcl=~/Documents/Diskerror/SuiteCRM-Tools/make_clean.sh
 ~~~
