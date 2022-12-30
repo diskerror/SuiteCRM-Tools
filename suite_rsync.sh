@@ -5,9 +5,6 @@
 #   code maintenance and development, and ignoring bulky data files and temporary
 #   upload files.
 
-# WARNING: Managed files, such as those ending with '.php', which are deleted locally
-#   will also be deleted on all remote servers when synchronizing.
-
 # For MacOS, Linux, BSD due to shell expansion. Using:
 # rsync  version 3.2.7  protocol version 31
 # Copyright (C) 1996-2022 by Andrew Tridgell, Wayne Davison, and others.
@@ -20,7 +17,7 @@
 #   so that SuiteCRM can write to it's own files and directories.
 
 # Set command and universal options.
-declare -r RSYNC='rsync -rlDue ssh'
+declare -r RSYNC='rsync -rlDume ssh'
 declare -r NL=$'\n'
 
 # Look for config file in the user's home directory.
