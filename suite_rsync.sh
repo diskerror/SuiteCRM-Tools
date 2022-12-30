@@ -39,8 +39,7 @@ declare CONT='yes'
 
 # Common exclude filters.
 declare -r COMMON_EXCLUDE='
-suite_rsync.sh
-*suite_rsync.cfg*
+*suite_rsync*
 /.idea/***
 /.editorconfig
 .DS_Store
