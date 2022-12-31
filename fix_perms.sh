@@ -25,11 +25,11 @@ echo 'fixing user and group'
 chown -R www-data:www-data .
 
 echo 'fixing files'
-find . -type f ! -regex '.*/\..*' -print0 | xargs -0 -n 500 chmod 664
+find . -type f ! -regex '.*/\..*' -print0 | xargs -0 -n 500 chmod 666
 
 echo 'fixing directories'
-find . -type d ! -regex '.*/\..*' -print0 | xargs -0 -n 500 chmod 775
-chmod 2775 'cache'
+find . -type d ! -regex '.*/\..*' -print0 | xargs -0 -n 500 chmod 777
+chmod 2777 'cache'
 #chmod 0750 'cache/themes'
 
 # The "excludes" are used to skip obvious non-executable files.
