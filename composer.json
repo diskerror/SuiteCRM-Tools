@@ -1,0 +1,14 @@
+{
+    "name": "reid/suite-crm-tools",
+    "description": "A set of scripts to help manage a SuiteCRM instance.",
+    "type": "project",
+    "require": {
+        "phpseclib/phpseclib": "3.0.*"
+    },
+    "authors": [
+        {
+            "name": "Reid Woodbury Jr.",
+            "email": "reid@rawsound.com"
+        }
+    ]
+}

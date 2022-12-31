@@ -1,6 +1,6 @@
 # SuiteCRM-Tools
 
-A set of bash scripts to help manage a SuiteCRM instance.
+A set of scripts to help manage a SuiteCRM instance.
 
 ## suite_rsync
 
