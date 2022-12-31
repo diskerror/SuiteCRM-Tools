@@ -17,7 +17,7 @@
 //	  so that SuiteCRM can write to it's own files and directories.
 
 //	 Set command and universal options.
-define('RSYNC', 'rsync -rlDume ssh');
+define('RSYNC', 'rsync --filter=._- -rltDumOe ssh');
 define('NL', "\n"); //	 Not PHP_EOL.
 
 //	 Look for config file in the user's home directory.
@@ -41,38 +41,41 @@ $subpathFilter = NL . '+ /**' . NL;
 $cont          = 'yes';
 
 //	Common exclude filters.
-define('COMMON_EXCLUDE', <<<COMMON_EXCLUDE
-*suite_rsync*
-/.idea/***
-/.editorconfig
-.DS_Store
-.git*
-.git*/**
-/.well-known/***
-*.log
-*.csv
-COMMON_EXCLUDE
+define('COMMON_FILTER', <<<'COMMON_FILTER'
+- *suite_rsync*
+- /.idea/***
+- /.editorconfig
+- .DS_Store
+- .git*
+- .git*/**
+- /.well-known/***
+- *.log
+- *.csv
+
+COMMON_FILTER
 );
 
 //	Exclude filters only needed with connections to live host.
-define('LIVE_EXCLUDE', <<<LIVE_EXCLUDE
-*.zip
-*[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]
-IMPORT_*[0-9]
-sugarcrm_old.sql
-09888
-LIVE_EXCLUDE
+define('LIVE_FILTER', <<<'LIVE_FILTER'
+- *.zip
+- *[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]
+- IMPORT_*[0-9]
+- sugarcrm_old.sql
+- 09888
+
+LIVE_FILTER
 );
 
 //	Do not push these back to live server.
-define('TO_LIVE_EXCLUDE', <<<TO_LIVE_EXCLUDE
-*~
-/cache/***
-/custom/history/***
-/upload/***
-/upload:/***
-/vendor/***
-TO_LIVE_EXCLUDE
+define('TO_LIVE_FILTER', <<<'TO_LIVE_FILTER'
+- *~
+- /cache/***
+- /custom/history/***
+- /upload/***
+- /upload:/***
+- /vendor/***
+
+TO_LIVE_FILTER
 );
 
 define('USAGE',
@@ -147,7 +150,11 @@ if (substr($subpath, 0, 1) === '/') {
 }
 
 if ($subpath !== '') {
-	$subpathFilter = NL . "+ /${subpath}/***" . NL . '/**' . NL;
+	$subpathFilter = <<<SPF
++ /${subpath}/***
+- /**
+
+SPF;
 }
 
 //	Read defaults from config file. They will overwrite corresponding variables.
@@ -172,23 +179,23 @@ if ($localServer !== '' && substr($localServer, -1) !== ':') {
 
 switch ($commandVerb) {
 	case 'livetodev';
-		$filters = COMMON_EXCLUDE . LIVE_EXCLUDE . $subpathFilter;
-		$cmd     = RSYNC . " $addOptions --bwlimit=2m --exclude-from=- $liveServer$liveServerPath $devPath";
+		$filters = COMMON_FILTER . LIVE_FILTER . $subpathFilter;
+		$cmd     = RSYNC . "$addOptions --bwlimit=8m $liveServer$liveServerPath $devPath";
 		break;
 
 	case 'devtolive';
-		$filters = TO_LIVE_EXCLUDE . COMMON_EXCLUDE . LIVE_EXCLUDE . $subpathFilter;
-		$cmd     = RSYNC . " $addOptions --bwlimit=2m --exclude-from=- $devPath $liveServer$liveServerPath";
+		$filters = COMMON_FILTER . LIVE_FILTER . TO_LIVE_FILTER . $subpathFilter;
+		$cmd     = RSYNC . "$addOptions --bwlimit=8m $devPath $liveServer$liveServerPath";
 		break;
 
 	case 'devtolocal';
-		$filters = COMMON_EXCLUDE . $subpathFilter;
-		$cmd     = RSYNC . " $addOptions --exclude-from=- $devPath $localServer$localServerPath";
+		$filters = COMMON_FILTER . $subpathFilter;
+		$cmd     = RSYNC . "$addOptions $devPath $localServer$localServerPath";
 		break;
 
 	case 'localtodev';
-		$filters = COMMON_EXCLUDE . $subpathFilter;
-		$cmd     = RSYNC . " $addOptions --exclude-from=- $localServer$localServerPath $devPath";
+		$filters = COMMON_FILTER . $subpathFilter;
+		$cmd     = RSYNC . "$addOptions $localServer$localServerPath $devPath";
 		break;
 
 	default:
@@ -198,7 +205,7 @@ switch ($commandVerb) {
 }
 
 //	Always print command to make sure.
-echo $filters, NL;
+echo $filters;
 echo $cmd, NL;
 
 if ($rline = readline(NL . 'Continue? [Y|n]: ')) {

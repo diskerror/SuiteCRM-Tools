@@ -17,7 +17,7 @@
 #   so that SuiteCRM can write to it's own files and directories.
 
 # Set command and universal options.
-declare -r RSYNC='rsync -rlDume ssh'
+declare -r RSYNC='rsync --filter=._- -rltDumOe ssh'
 declare -r NL=$'\n'
 
 # Look for config file in the user's home directory.
@@ -38,39 +38,39 @@ declare SUBPATH_FILTER="${NL}+ /**${NL}"
 declare CONT='yes'
 
 # Common exclude filters.
-declare -r COMMON_EXCLUDE='
-*suite_rsync*
-/.idea/***
-/.editorconfig
-.DS_Store
-.git*
-.git*/**
-/.well-known/***
-*.log
-*.csv'
+declare -r COMMON_FILTER='
+- *suite_rsync*
+- /.idea/***
+- /.editorconfig
+- .DS_Store
+- .git*
+- .git*/**
+- /.well-known/***
+- *.log
+- *.csv'
 
 # Exclude filters only needed with connections to live host.
-declare -r LIVE_EXCLUDE='
-*.zip
-*[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]
-IMPORT_*[0-9]
-sugarcrm_old.sql
-09888'
+declare -r LIVE_FILTER='
+- *.zip
+- *[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]
+- IMPORT_*[0-9]
+- sugarcrm_old.sql
+- 09888'
 
 # Do not push these back to live server.
-declare -r TO_LIVE_EXCLUDE='
-*~
-/cache/***
-/custom/history/***
-/upload/***
-/upload:/***
-/vendor/***'
+declare -r TO_LIVE_FILTER='
+- *~
+- /cache/***
+- /custom/history/***
+- /upload/***
+- /upload:/***
+- /vendor/***'
 
 usage () {
     echo "Usage: $(basename $0) [-dhis] local-dev-directory livetodev|devtolive|devtolocal|localtodev [subpath only]"
 }
 
-##########################################################################################
+################################################################################
 # MAIN
 
 # Handle options.
@@ -124,11 +124,11 @@ if [[ $# -eq 3 ]]
 then
     case $3 in
         /*)
-            SUBPATH_FILTER="${NL}+ ${3}/***${NL}/**${NL}"
+            SUBPATH_FILTER="${NL}+ ${3}/***${NL}- /**${NL}"
             ;;
             
         *)
-            SUBPATH_FILTER="${NL}+ /${3}/***${NL}/**${NL}"
+            SUBPATH_FILTER="${NL}+ /${3}/***${NL}- /**${NL}"
             ;;
     esac
     SUBPATH="${3}"
@@ -143,23 +143,23 @@ fi
 
 case $2 in
     livetodev)
-        FILTERS="${COMMON_EXCLUDE}${LIVE_EXCLUDE}${SUBPATH_FILTER}"
-        CMD="$RSYNC ${ADD_OPTIONS} --bwlimit=2m --exclude-from=- $LIVE_SERVER:$LIVE_SERVER_PATH $DEV_PATH"
+        FILTERS="${COMMON_FILTER}${LIVE_FILTER}${SUBPATH_FILTER}"
+        CMD="$RSYNC$ADD_OPTIONS --bwlimit=8m $LIVE_SERVER:$LIVE_SERVER_PATH $DEV_PATH"
         ;;
 
     devtolive)
-        FILTERS="${TO_LIVE_EXCLUDE}${COMMON_EXCLUDE}${LIVE_EXCLUDE}${SUBPATH_FILTER}"
-        CMD="$RSYNC ${ADD_OPTIONS} --bwlimit=2m --exclude-from=- $DEV_PATH $LIVE_SERVER:$LIVE_SERVER_PATH"
+        FILTERS="${COMMON_FILTER}${LIVE_FILTER}${TO_LIVE_FILTER}${SUBPATH_FILTER}"
+        CMD="$RSYNC$ADD_OPTIONS --bwlimit=8m $DEV_PATH $LIVE_SERVER:$LIVE_SERVER_PATH"
         ;;
 
     devtolocal)
-        FILTERS="${COMMON_EXCLUDE}${SUBPATH_FILTER}"
-        CMD="$RSYNC ${ADD_OPTIONS} --exclude-from=- $DEV_PATH $LOCAL_SERVER:$LOCAL_SERVER_PATH"
+        FILTERS="${COMMON_FILTER}${SUBPATH_FILTER}"
+        CMD="$RSYNC$ADD_OPTIONS $DEV_PATH $LOCAL_SERVER:$LOCAL_SERVER_PATH"
         ;;
 
     localtodev)
-        FILTERS="${COMMON_EXCLUDE}${SUBPATH_FILTER}"
-        CMD="$RSYNC ${ADD_OPTIONS} --exclude-from=- $LOCAL_SERVER:$LOCAL_SERVER_PATH $DEV_PATH"
+        FILTERS="${COMMON_FILTER}${SUBPATH_FILTER}"
+        CMD="$RSYNC$ADD_OPTIONS $LOCAL_SERVER:$LOCAL_SERVER_PATH $DEV_PATH"
         ;;
 
     *)
