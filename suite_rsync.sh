@@ -27,9 +27,8 @@ declare -r CONFIG_FILE='.suite_rsync.cfg'
 declare LIVE_SERVER='10.10.10.17'
 declare LOCAL_SERVER='192.168.56.5'
 
-# Both paths must have a trailing slash.
-declare LIVE_SERVER_PATH='/var/www/html/'
-declare LOCAL_SERVER_PATH='/var/www/html/'
+# Path must have a trailing slash.
+declare SERVER_PATH='/var/www/html/'
 
 declare FILTERS=''
 declare ADD_OPTIONS=''
@@ -67,7 +66,7 @@ declare -r TO_LIVE_FILTER='
 - /vendor/***'
 
 usage () {
-    echo "Usage: $(basename $0) [-dhis] local-dev-directory livetodev|devtolive|devtolocal|localtodev [subpath only]"
+    echo "Usage: $(basename $0) [-dhis] development-directory livetodev|devtolive|devtolocal|localtodev [subpath only]"
 }
 
 ################################################################################
@@ -144,22 +143,22 @@ fi
 case $2 in
     livetodev)
         FILTERS="${COMMON_FILTER}${LIVE_FILTER}${SUBPATH_FILTER}"
-        CMD="$RSYNC$ADD_OPTIONS --bwlimit=8m $LIVE_SERVER:$LIVE_SERVER_PATH $DEV_PATH"
+        CMD="$RSYNC$ADD_OPTIONS --bwlimit=8m $LIVE_SERVER:$SERVER_PATH $DEV_PATH"
         ;;
 
     devtolive)
         FILTERS="${COMMON_FILTER}${LIVE_FILTER}${TO_LIVE_FILTER}${SUBPATH_FILTER}"
-        CMD="$RSYNC$ADD_OPTIONS --bwlimit=8m $DEV_PATH $LIVE_SERVER:$LIVE_SERVER_PATH"
+        CMD="$RSYNC$ADD_OPTIONS --bwlimit=8m $DEV_PATH $LIVE_SERVER:$SERVER_PATH"
         ;;
 
     devtolocal)
         FILTERS="${COMMON_FILTER}${SUBPATH_FILTER}"
-        CMD="$RSYNC$ADD_OPTIONS $DEV_PATH $LOCAL_SERVER:$LOCAL_SERVER_PATH"
+        CMD="$RSYNC$ADD_OPTIONS $DEV_PATH $LOCAL_SERVER:$SERVER_PATH"
         ;;
 
     localtodev)
         FILTERS="${COMMON_FILTER}${SUBPATH_FILTER}"
-        CMD="$RSYNC$ADD_OPTIONS $LOCAL_SERVER:$LOCAL_SERVER_PATH $DEV_PATH"
+        CMD="$RSYNC$ADD_OPTIONS $LOCAL_SERVER:$SERVER_PATH $DEV_PATH"
         ;;
 
     *)

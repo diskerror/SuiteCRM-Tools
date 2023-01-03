@@ -28,9 +28,8 @@ define('CONFIG_FILE', '.suite_rsync.ini');
 $liveServer  = '10.10.10.17';
 $localServer = '192.168.56.5';
 
-//	 Both paths must have a trailing slash.
-$liveServerPath  = '/var/www/html/';
-$localServerPath = '/var/www/html/';
+//	 Path must have a trailing slash.
+$serverPath = '/var/www/html/';
 
 $devPath       = '';
 $commandVerb   = '';
@@ -180,22 +179,22 @@ if ($localServer !== '' && substr($localServer, -1) !== ':') {
 switch ($commandVerb) {
 	case 'livetodev';
 		$filters = COMMON_FILTER . LIVE_FILTER . $subpathFilter;
-		$cmd     = RSYNC . "$addOptions --bwlimit=8m $liveServer$liveServerPath $devPath";
+		$cmd     = RSYNC . "$addOptions --bwlimit=8m $liveServer$serverPath $devPath";
 		break;
 
 	case 'devtolive';
 		$filters = COMMON_FILTER . LIVE_FILTER . TO_LIVE_FILTER . $subpathFilter;
-		$cmd     = RSYNC . "$addOptions --bwlimit=8m $devPath $liveServer$liveServerPath";
+		$cmd     = RSYNC . "$addOptions --bwlimit=8m $devPath $liveServer$serverPath";
 		break;
 
 	case 'devtolocal';
 		$filters = COMMON_FILTER . $subpathFilter;
-		$cmd     = RSYNC . "$addOptions $devPath $localServer$localServerPath";
+		$cmd     = RSYNC . "$addOptions $devPath $localServer$serverPath";
 		break;
 
 	case 'localtodev';
 		$filters = COMMON_FILTER . $subpathFilter;
-		$cmd     = RSYNC . "$addOptions $localServer$localServerPath $devPath";
+		$cmd     = RSYNC . "$addOptions $localServer$serverPath $devPath";
 		break;
 
 	default:
