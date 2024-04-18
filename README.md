@@ -2,6 +2,8 @@
 
 A set of scripts to help manage a SuiteCRM instance.
 
+ABANDONDED: Files moved to [Doodle](https://github.com/diskerror/Doodle).
+
 ## suite_rsync
 
 A wrapper for rsync to ignore and protect business documents and data files from
